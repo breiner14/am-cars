@@ -2,6 +2,7 @@ package com.am_cars.apuntes_mecanica.repository;
 
 import com.am_cars.apuntes_mecanica.entity.Notification;
 import com.am_cars.apuntes_mecanica.entity.Procedure;
+import com.am_cars.apuntes_mecanica.entity.User;
 import com.am_cars.apuntes_mecanica.entity.Vehicle;
 import com.am_cars.apuntes_mecanica.entity.enums.NotificationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -41,7 +42,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	List<Notification> findByStatus(NotificationStatus status);
 	
 	/**
-	 * Busca notificaciones pendientes
+	 * Busca notificaciones por estado ordenadas por fecha de creación descendente
 	 */
 	List<Notification> findByStatusOrderByCreatedAtDesc(NotificationStatus status);
 	
@@ -49,6 +50,21 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
 	 * Busca todas las notificaciones de un vehículo ordenadas por fecha de creación descendente
 	 */
 	List<Notification> findByVehicleIdOrderByCreatedAtDesc(Long vehicleId);
+	
+	/**
+	 * Busca todas las notificaciones creadas por un usuario
+	 */
+	List<Notification> findByCreatedBy(User createdBy);
+	
+	/**
+	 * Busca todas las notificaciones creadas por un usuario (por ID)
+	 */
+	List<Notification> findByCreatedById(Long createdById);
+	
+	/**
+	 * Busca todas las notificaciones creadas por un usuario ordenadas por fecha de creación descendente
+	 */
+	List<Notification> findByCreatedByIdOrderByCreatedAtDesc(Long createdById);
 	
 }
 

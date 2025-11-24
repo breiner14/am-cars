@@ -126,5 +126,23 @@ public class NotificationController {
 		List<Notification> notifications = notificationService.findByStatusOrderByCreatedAtDesc(status);
 		return ResponseEntity.ok(notifications);
 	}
+	
+	/**
+	 * Busca todas las notificaciones creadas por un usuario
+	 */
+	@GetMapping("/created-by/{userId}")
+	public ResponseEntity<List<Notification>> getByCreatedById(@PathVariable Long userId) {
+		List<Notification> notifications = notificationService.findByCreatedById(userId);
+		return ResponseEntity.ok(notifications);
+	}
+	
+	/**
+	 * Busca todas las notificaciones creadas por un usuario ordenadas por fecha descendente
+	 */
+	@GetMapping("/created-by/{userId}/recent")
+	public ResponseEntity<List<Notification>> getByCreatedByIdOrderByCreatedAtDesc(@PathVariable Long userId) {
+		List<Notification> notifications = notificationService.findByCreatedByIdOrderByCreatedAtDesc(userId);
+		return ResponseEntity.ok(notifications);
+	}
 }
 
