@@ -5,6 +5,7 @@ import com.am_cars.apuntes_mecanica.service.MechanicService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +21,10 @@ public class MechanicController {
 	private MechanicService mechanicService;
 	
 	/**
-	 * Crea un nuevo mecánico
+	 * Crea un nuevo mecánico - Solo ADMIN
 	 */
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Mechanic> create(@RequestBody Mechanic mechanic) {
 		Mechanic created = mechanicService.create(mechanic);
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -48,9 +50,10 @@ public class MechanicController {
 	}
 	
 	/**
-	 * Actualiza un mecánico existente
+	 * Actualiza un mecánico existente - Solo ADMIN
 	 */
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Mechanic> update(@PathVariable Long id, @RequestBody Mechanic mechanic) {
 		try {
 			Mechanic updated = mechanicService.update(id, mechanic);
@@ -61,9 +64,10 @@ public class MechanicController {
 	}
 	
 	/**
-	 * Elimina un mecánico por ID
+	 * Elimina un mecánico por ID - Solo ADMIN
 	 */
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			mechanicService.deleteById(id);

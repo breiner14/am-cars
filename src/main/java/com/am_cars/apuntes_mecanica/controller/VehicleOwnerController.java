@@ -5,6 +5,7 @@ import com.am_cars.apuntes_mecanica.service.VehicleOwnerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +21,10 @@ public class VehicleOwnerController {
 	private VehicleOwnerService vehicleOwnerService;
 	
 	/**
-	 * Crea un nuevo propietario de vehículo
+	 * Crea un nuevo propietario de vehículo - Solo ADMIN
 	 */
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<VehicleOwner> create(@RequestBody VehicleOwner vehicleOwner) {
 		VehicleOwner created = vehicleOwnerService.create(vehicleOwner);
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -48,9 +50,10 @@ public class VehicleOwnerController {
 	}
 	
 	/**
-	 * Actualiza un propietario existente
+	 * Actualiza un propietario existente - Solo ADMIN
 	 */
 	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<VehicleOwner> update(@PathVariable Long id, @RequestBody VehicleOwner vehicleOwner) {
 		try {
 			VehicleOwner updated = vehicleOwnerService.update(id, vehicleOwner);
@@ -61,9 +64,10 @@ public class VehicleOwnerController {
 	}
 	
 	/**
-	 * Elimina un propietario por ID
+	 * Elimina un propietario por ID - Solo ADMIN
 	 */
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			vehicleOwnerService.deleteById(id);

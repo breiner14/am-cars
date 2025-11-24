@@ -8,6 +8,11 @@ spring:
 server:
   port: 8080
 
+# Configuración JWT
+jwt:
+  secret: ${JWT_SECRET:mySecretKey1234567890123456789012345678901234567890}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 horas en milisegundos
+
 logging:
   level:
     root: INFO

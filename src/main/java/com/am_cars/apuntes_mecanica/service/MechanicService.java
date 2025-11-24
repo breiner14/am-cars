@@ -3,6 +3,7 @@ package com.am_cars.apuntes_mecanica.service;
 import com.am_cars.apuntes_mecanica.entity.Mechanic;
 import com.am_cars.apuntes_mecanica.repository.MechanicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +20,17 @@ public class MechanicService {
 	@Autowired
 	private MechanicRepository mechanicRepository;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	/**
 	 * Crea un nuevo mecánico
 	 */
 	public Mechanic create(Mechanic mechanic) {
+		// Codificar contraseña si no está ya codificada
+		if (mechanic.getPassword() != null && !mechanic.getPassword().startsWith("$2a$")) {
+			mechanic.setPassword(passwordEncoder.encode(mechanic.getPassword()));
+		}
 		return mechanicRepository.save(mechanic);
 	}
 	
@@ -50,9 +58,16 @@ public class MechanicService {
 				.orElseThrow(() -> new RuntimeException("Mecánico no encontrado con ID: " + id));
 		
 		// Actualizar campos
-		mechanic.setRol(mechanicDetails.getRol());
+		mechanic.setRole(mechanicDetails.getRole());
 		mechanic.setUsername(mechanicDetails.getUsername());
-		mechanic.setPassword(mechanicDetails.getPassword());
+		// Solo actualizar contraseña si se proporciona una nueva
+		if (mechanicDetails.getPassword() != null && !mechanicDetails.getPassword().isEmpty()) {
+			if (!mechanicDetails.getPassword().startsWith("$2a$")) {
+				mechanic.setPassword(passwordEncoder.encode(mechanicDetails.getPassword()));
+			} else {
+				mechanic.setPassword(mechanicDetails.getPassword());
+			}
+		}
 		mechanic.setEmail(mechanicDetails.getEmail());
 		mechanic.setTipoDocumento(mechanicDetails.getTipoDocumento());
 		mechanic.setNumeroDoc(mechanicDetails.getNumeroDoc());

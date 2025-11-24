@@ -10,14 +10,14 @@ import java.util.List;
 
 /**
  * Entidad Mechanic - Representa un mecánico
- * Hereda de Person
+ * Hereda de User
  */
 @Entity
 @Table(name = "mechanic")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "person_id")
-public class Mechanic extends Person {
+@PrimaryKeyJoinColumn(name = "user_id")
+public class Mechanic extends User {
 	
 	@Column(name = "direccion_taller", length = 255)
 	private String direccionTaller;

@@ -5,6 +5,7 @@ import com.am_cars.apuntes_mecanica.service.ProcedureService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +21,10 @@ public class ProcedureController {
 	private ProcedureService procedureService;
 	
 	/**
-	 * Crea un nuevo procedimiento
+	 * Crea un nuevo procedimiento - ADMIN y MECHANIC
 	 */
 	@PostMapping
+	@PreAuthorize("hasAnyRole('ADMIN', 'MECHANIC')")
 	public ResponseEntity<Procedure> create(@RequestBody Procedure procedure) {
 		try {
 			Procedure created = procedureService.create(procedure);
@@ -62,9 +64,10 @@ public class ProcedureController {
 	}
 	
 	/**
-	 * Actualiza un procedimiento existente
+	 * Actualiza un procedimiento existente - ADMIN y MECHANIC
 	 */
 	@PutMapping("/code/{code}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'MECHANIC')")
 	public ResponseEntity<Procedure> update(@PathVariable Integer code, @RequestBody Procedure procedure) {
 		try {
 			Procedure updated = procedureService.update(code, procedure);
@@ -75,9 +78,10 @@ public class ProcedureController {
 	}
 	
 	/**
-	 * Elimina un procedimiento por código
+	 * Elimina un procedimiento por código - Solo ADMIN
 	 */
 	@DeleteMapping("/code/{code}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Integer code) {
 		try {
 			procedureService.deleteByCode(code);

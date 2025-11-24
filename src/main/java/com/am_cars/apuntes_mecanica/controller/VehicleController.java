@@ -5,6 +5,7 @@ import com.am_cars.apuntes_mecanica.service.VehicleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,9 +21,10 @@ public class VehicleController {
 	private VehicleService vehicleService;
 	
 	/**
-	 * Crea un nuevo vehículo
+	 * Crea un nuevo vehículo - ADMIN y OWNER
 	 */
 	@PostMapping
+	@PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
 	public ResponseEntity<Vehicle> create(@RequestBody Vehicle vehicle) {
 		try {
 			Vehicle created = vehicleService.create(vehicle);
@@ -52,9 +54,10 @@ public class VehicleController {
 	}
 	
 	/**
-	 * Actualiza un vehículo existente
+	 * Actualiza un vehículo existente - ADMIN y OWNER
 	 */
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'OWNER')")
 	public ResponseEntity<Vehicle> update(@PathVariable Long id, @RequestBody Vehicle vehicle) {
 		try {
 			Vehicle updated = vehicleService.update(id, vehicle);
@@ -65,9 +68,10 @@ public class VehicleController {
 	}
 	
 	/**
-	 * Elimina un vehículo por ID
+	 * Elimina un vehículo por ID - Solo ADMIN
 	 */
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			vehicleService.deleteById(id);

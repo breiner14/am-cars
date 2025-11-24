@@ -3,6 +3,7 @@ package com.am_cars.apuntes_mecanica.service;
 import com.am_cars.apuntes_mecanica.entity.VehicleOwner;
 import com.am_cars.apuntes_mecanica.repository.VehicleOwnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +20,17 @@ public class VehicleOwnerService {
 	@Autowired
 	private VehicleOwnerRepository vehicleOwnerRepository;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	/**
 	 * Crea un nuevo propietario de vehículo
 	 */
 	public VehicleOwner create(VehicleOwner vehicleOwner) {
+		// Codificar contraseña si no está ya codificada
+		if (vehicleOwner.getPassword() != null && !vehicleOwner.getPassword().startsWith("$2a$")) {
+			vehicleOwner.setPassword(passwordEncoder.encode(vehicleOwner.getPassword()));
+		}
 		return vehicleOwnerRepository.save(vehicleOwner);
 	}
 	
@@ -50,9 +58,16 @@ public class VehicleOwnerService {
 				.orElseThrow(() -> new RuntimeException("Propietario no encontrado con ID: " + id));
 		
 		// Actualizar campos
-		vehicleOwner.setRol(vehicleOwnerDetails.getRol());
+		vehicleOwner.setRole(vehicleOwnerDetails.getRole());
 		vehicleOwner.setUsername(vehicleOwnerDetails.getUsername());
-		vehicleOwner.setPassword(vehicleOwnerDetails.getPassword());
+		// Solo actualizar contraseña si se proporciona una nueva
+		if (vehicleOwnerDetails.getPassword() != null && !vehicleOwnerDetails.getPassword().isEmpty()) {
+			if (!vehicleOwnerDetails.getPassword().startsWith("$2a$")) {
+				vehicleOwner.setPassword(passwordEncoder.encode(vehicleOwnerDetails.getPassword()));
+			} else {
+				vehicleOwner.setPassword(vehicleOwnerDetails.getPassword());
+			}
+		}
 		vehicleOwner.setEmail(vehicleOwnerDetails.getEmail());
 		vehicleOwner.setTipoDocumento(vehicleOwnerDetails.getTipoDocumento());
 		vehicleOwner.setNumeroDoc(vehicleOwnerDetails.getNumeroDoc());

@@ -7,10 +7,25 @@
 	},
 	"item": [
 		{
-			"name": "Mechanics",
+			"name": "Authentication",
 			"item": [
 				{
-					"name": "Create Mechanic",
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"jwt_token\", jsonData.token);",
+									"    console.log(\"Token guardado: \" + jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -21,14 +36,93 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"rol\": \"MECANICO\",\n  \"username\": \"juan_mechanic\",\n  \"password\": \"password123\",\n  \"email\": \"juan@taller.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 12345678,\n  \"telefono\": 3001234567,\n  \"direccionTaller\": \"Calle 123 #45-67\",\n  \"telefonoTaller\": \"6012345678\",\n  \"nombreTaller\": \"Taller Juan\",\n  \"horarioAtencion\": \"Lun-Vie 8:00-18:00\",\n  \"especialidades\": [\"MECANICO\", \"MOTORES\", \"FRENOS\"]\n}"
+							"raw": "{\n  \"username\": \"juan_mechanic\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						},
+						"description": "Autentica un usuario y obtiene un token JWT. El token se guarda automáticamente en la variable de colección 'jwt_token'."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Owner",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"carlos_owner\",\n  \"password\": \"password123\",\n  \"email\": \"carlos@email.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 87654321,\n  \"telefono\": 3009876543\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register/owner",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register", "owner"]
+						},
+						"description": "Registra un nuevo propietario de vehículo. El rol se asigna automáticamente como OWNER."
+					},
+					"response": []
+				},
+				{
+					"name": "Register Mechanic",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"juan_mechanic\",\n  \"password\": \"password123\",\n  \"email\": \"juan@taller.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 12345678,\n  \"telefono\": 3001234567,\n  \"direccionTaller\": \"Calle 123 #45-67\",\n  \"telefonoTaller\": \"6012345678\",\n  \"nombreTaller\": \"Taller Juan\",\n  \"horarioAtencion\": \"Lun-Vie 8:00-18:00\",\n  \"especialidades\": [\"MECANICO\", \"MOTORES\", \"FRENOS\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register/mechanic",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register", "mechanic"]
+						},
+						"description": "Registra un nuevo mecánico. El rol se asigna automáticamente como MECHANIC."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mechanics",
+			"item": [
+				{
+					"name": "Create Mechanic",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"MECHANIC\",\n  \"username\": \"juan_mechanic\",\n  \"password\": \"password123\",\n  \"email\": \"juan@taller.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 12345678,\n  \"telefono\": 3001234567,\n  \"direccionTaller\": \"Calle 123 #45-67\",\n  \"telefonoTaller\": \"6012345678\",\n  \"nombreTaller\": \"Taller Juan\",\n  \"horarioAtencion\": \"Lun-Vie 8:00-18:00\",\n  \"especialidades\": [\"MECANICO\", \"MOTORES\", \"FRENOS\"]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/mechanics",
 							"host": ["{{base_url}}"],
 							"path": ["mechanics"]
 						},
-						"description": "Crea un nuevo mecánico"
+						"description": "Crea un nuevo mecánico - Requiere rol ADMIN"
 					},
 					"response": []
 				},
@@ -36,7 +130,13 @@
 					"name": "Get All Mechanics",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/mechanics",
 							"host": ["{{base_url}}"],
@@ -50,7 +150,13 @@
 					"name": "Get Mechanic by ID",
 					"request": {
 						"method": "GET",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/mechanics/:id",
 							"host": ["{{base_url}}"],
@@ -74,11 +180,16 @@
 							{
 								"key": "Content-Type",
 								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"rol\": \"MECANICO\",\n  \"username\": \"juan_mechanic_updated\",\n  \"password\": \"newpassword123\",\n  \"email\": \"juan.updated@taller.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 12345678,\n  \"telefono\": 3001234567,\n  \"direccionTaller\": \"Calle 123 #45-67 Actualizada\",\n  \"telefonoTaller\": \"6012345679\",\n  \"nombreTaller\": \"Taller Juan Actualizado\",\n  \"horarioAtencion\": \"Lun-Sab 7:00-19:00\",\n  \"especialidades\": [\"MECANICO\", \"MOTORES\", \"FRENOS\", \"SUSPENSION\"]\n}"
+							"raw": "{\n  \"role\": \"MECHANIC\",\n  \"username\": \"juan_mechanic_updated\",\n  \"password\": \"newpassword123\",\n  \"email\": \"juan.updated@taller.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 12345678,\n  \"telefono\": 3001234567,\n  \"direccionTaller\": \"Calle 123 #45-67 Actualizada\",\n  \"telefonoTaller\": \"6012345679\",\n  \"nombreTaller\": \"Taller Juan Actualizado\",\n  \"horarioAtencion\": \"Lun-Sab 7:00-19:00\",\n  \"especialidades\": [\"MECANICO\", \"MOTORES\", \"FRENOS\", \"SUSPENSION\"]\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/mechanics/:id",
@@ -91,7 +202,7 @@
 								}
 							]
 						},
-						"description": "Actualiza un mecánico existente"
+						"description": "Actualiza un mecánico existente - Requiere rol ADMIN"
 					},
 					"response": []
 				},
@@ -99,7 +210,13 @@
 					"name": "Delete Mechanic",
 					"request": {
 						"method": "DELETE",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
 						"url": {
 							"raw": "{{base_url}}/mechanics/:id",
 							"host": ["{{base_url}}"],
@@ -111,7 +228,7 @@
 								}
 							]
 						},
-						"description": "Elimina un mecánico por ID"
+						"description": "Elimina un mecánico por ID - Requiere rol ADMIN"
 					},
 					"response": []
 				},
@@ -192,7 +309,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"rol\": \"PROPIETARIO\",\n  \"username\": \"carlos_owner\",\n  \"password\": \"password123\",\n  \"email\": \"carlos@email.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 87654321,\n  \"telefono\": 3009876543\n}"
+							"raw": "{\n  \"role\": \"OWNER\",\n  \"username\": \"carlos_owner\",\n  \"password\": \"password123\",\n  \"email\": \"carlos@email.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 87654321,\n  \"telefono\": 3009876543\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/vehicle-owners",
@@ -249,7 +366,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"rol\": \"PROPIETARIO\",\n  \"username\": \"carlos_owner_updated\",\n  \"password\": \"newpassword123\",\n  \"email\": \"carlos.updated@email.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 87654321,\n  \"telefono\": 3009876544\n}"
+							"raw": "{\n  \"role\": \"OWNER\",\n  \"username\": \"carlos_owner_updated\",\n  \"password\": \"newpassword123\",\n  \"email\": \"carlos.updated@email.com\",\n  \"tipoDocumento\": \"CC\",\n  \"numeroDoc\": 87654321,\n  \"telefono\": 3009876544\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/vehicle-owners/:id",
@@ -949,6 +1066,11 @@
 		{
 			"key": "base_url",
 			"value": "http://localhost:8080/api",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
 			"type": "string"
 		}
 	]

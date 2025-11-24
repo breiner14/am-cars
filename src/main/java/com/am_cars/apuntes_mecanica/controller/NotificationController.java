@@ -6,6 +6,7 @@ import com.am_cars.apuntes_mecanica.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +22,10 @@ public class NotificationController {
 	private NotificationService notificationService;
 	
 	/**
-	 * Crea una nueva notificación
+	 * Crea una nueva notificación - ADMIN y MECHANIC
 	 */
 	@PostMapping
+	@PreAuthorize("hasAnyRole('ADMIN', 'MECHANIC')")
 	public ResponseEntity<Notification> create(@RequestBody Notification notification) {
 		try {
 			Notification created = notificationService.create(notification);
@@ -53,9 +55,10 @@ public class NotificationController {
 	}
 	
 	/**
-	 * Actualiza una notificación existente
+	 * Actualiza una notificación existente - ADMIN y MECHANIC
 	 */
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN', 'MECHANIC')")
 	public ResponseEntity<Notification> update(@PathVariable Long id, @RequestBody Notification notification) {
 		try {
 			Notification updated = notificationService.update(id, notification);
@@ -66,9 +69,10 @@ public class NotificationController {
 	}
 	
 	/**
-	 * Elimina una notificación por ID
+	 * Elimina una notificación por ID - Solo ADMIN
 	 */
 	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		try {
 			notificationService.deleteById(id);

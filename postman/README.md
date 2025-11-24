@@ -2,11 +2,29 @@
 
 Esta colección contiene todos los endpoints de la API de Apuntes Mecánica para facilitar las pruebas y el desarrollo.
 
+## Autenticación JWT
+
+La API utiliza autenticación basada en tokens JWT. Para usar los endpoints protegidos:
+
+1. **Primero, realiza el login** usando el endpoint `POST /api/auth/login`
+2. El token JWT se guarda automáticamente en la variable de colección `jwt_token`
+3. Todos los endpoints protegidos incluyen automáticamente el header `Authorization: Bearer {{jwt_token}}`
+
+### Roles disponibles:
+- **ADMIN**: Acceso completo a todos los endpoints
+- **OWNER**: Propietario de vehículo - puede gestionar sus vehículos
+- **MECHANIC**: Mecánico - puede crear y actualizar procedimientos y notificaciones
+
 ## 📋 Contenido
 
 La colección incluye los siguientes grupos de endpoints:
 
-### 1. **Mechanics** (Mecánicos)
+### 0. **Authentication** (Autenticación) - ⚠️ PÚBLICO
+- Login - Autentica y obtiene token JWT
+- Register Owner - Registra un nuevo propietario
+- Register Mechanic - Registra un nuevo mecánico
+
+### 1. **Mechanics** (Mecánicos) - 🔒 Requiere autenticación
 - Crear mecánico
 - Obtener todos los mecánicos
 - Obtener mecánico por ID
@@ -14,7 +32,7 @@ La colección incluye los siguientes grupos de endpoints:
 - Eliminar mecánico
 - Buscar por username, email o documento
 
-### 2. **Vehicle Owners** (Propietarios)
+### 2. **Vehicle Owners** (Propietarios) - 🔒 Requiere autenticación
 - Crear propietario
 - Obtener todos los propietarios
 - Obtener propietario por ID
@@ -22,7 +40,7 @@ La colección incluye los siguientes grupos de endpoints:
 - Eliminar propietario
 - Buscar por username, email o documento
 
-### 3. **Vehicles** (Vehículos)
+### 3. **Vehicles** (Vehículos) - 🔒 Requiere autenticación
 - Crear vehículo
 - Obtener todos los vehículos
 - Obtener vehículo por ID
@@ -31,7 +49,7 @@ La colección incluye los siguientes grupos de endpoints:
 - Buscar por placa, chasis o propietario
 - Verificar existencia de placa
 
-### 4. **Procedures** (Procedimientos)
+### 4. **Procedures** (Procedimientos) - 🔒 Requiere autenticación
 - Crear procedimiento
 - Obtener todos los procedimientos
 - Obtener procedimiento por ID o código
@@ -40,7 +58,7 @@ La colección incluye los siguientes grupos de endpoints:
 - Buscar por vehículo o nombre
 - Verificar existencia de código
 
-### 5. **Notifications** (Notificaciones)
+### 5. **Notifications** (Notificaciones) - 🔒 Requiere autenticación
 - Crear notificación
 - Obtener todas las notificaciones
 - Obtener notificación por ID
@@ -72,13 +90,46 @@ Para cambiar la URL base:
    - Desarrollo: `http://localhost:8080/api`
    - Producción: `https://tu-dominio.com/api`
 
+### Flujo de autenticación
+
+1. **Registrar un usuario** (opcional, si no existe):
+   - Usa `POST /api/auth/register/owner` o `POST /api/auth/register/mechanic`
+   
+2. **Hacer login**:
+   - Ejecuta `POST /api/auth/login` con username y password
+   - El token se guarda automáticamente en `jwt_token`
+   
+3. **Usar endpoints protegidos**:
+   - Todos los endpoints protegidos ya incluyen el header `Authorization: Bearer {{jwt_token}}`
+   - El token se renueva automáticamente al hacer login nuevamente
+
 ### Ejemplos de uso
 
-#### Crear un Mecánico
+#### Login
+```json
+POST {{base_url}}/auth/login
+{
+  "username": "juan_mechanic",
+  "password": "password123"
+}
+
+Respuesta:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer",
+  "id": 1,
+  "username": "juan_mechanic",
+  "email": "juan@taller.com",
+  "role": "MECHANIC"
+}
+```
+
+#### Crear un Mecánico (Requiere ADMIN)
 ```json
 POST {{base_url}}/mechanics
+Headers: Authorization: Bearer {{jwt_token}}
 {
-  "rol": "MECANICO",
+  "role": "MECHANIC",
   "username": "juan_mechanic",
   "password": "password123",
   "email": "juan@taller.com",
@@ -93,9 +144,10 @@ POST {{base_url}}/mechanics
 }
 ```
 
-#### Crear un Vehículo
+#### Crear un Vehículo (Requiere ADMIN u OWNER)
 ```json
 POST {{base_url}}/vehicles
+Headers: Authorization: Bearer {{jwt_token}}
 {
   "plate": "ABC123",
   "cylinderCapacity": "1600cc",
@@ -109,9 +161,10 @@ POST {{base_url}}/vehicles
 }
 ```
 
-#### Crear un Procedimiento
+#### Crear un Procedimiento (Requiere ADMIN o MECHANIC)
 ```json
 POST {{base_url}}/procedures
+Headers: Authorization: Bearer {{jwt_token}}
 {
   "name": "Cambio de aceite",
   "duration": 60,
@@ -127,6 +180,18 @@ POST {{base_url}}/procedures
 ```
 
 ## 📝 Notas importantes
+
+### Permisos por Rol
+
+- **ADMIN**: Acceso completo a todos los endpoints (crear, leer, actualizar, eliminar)
+- **OWNER**: 
+  - Puede crear y actualizar vehículos
+  - Puede leer todos los recursos
+  - No puede eliminar vehículos (solo ADMIN)
+- **MECHANIC**:
+  - Puede crear y actualizar procedimientos y notificaciones
+  - Puede leer todos los recursos
+  - No puede eliminar recursos (solo ADMIN)
 
 ### Especialidades de Mecánico
 Los valores válidos para `especialidades` son:
@@ -152,6 +217,13 @@ Los valores válidos para `status` en notificaciones son:
 - **Vehicle** requiere un `vehicleOwner` (id del propietario)
 - **Procedure** requiere un `vehicle` (id del vehículo) y un `mechanic` (id del mecánico)
 - **Notification** requiere un `vehicle` (id del vehículo) y un `procedure` (código del procedimiento)
+
+### Cambios importantes
+
+- El campo `rol` (String) ha sido reemplazado por `role` (Enum: ADMIN, OWNER, MECHANIC)
+- Todos los endpoints protegidos requieren el header `Authorization: Bearer <token>`
+- El token JWT se guarda automáticamente al hacer login
+- El token expira después de 24 horas (configurable)
 
 ## 🔧 Requisitos
 
