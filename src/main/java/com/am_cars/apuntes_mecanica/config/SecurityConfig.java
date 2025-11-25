@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 /**
  * Configuración de Spring Security
@@ -56,7 +57,10 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						// Endpoints públicos
 						.requestMatchers("/api/auth/**").permitAll()
-						// Endpoints de administración - solo ADMIN
+						// Permitir creación de mechanics y vehicle-owners sin autenticación
+						.requestMatchers(HttpMethod.POST, "/api/mechanics").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/vehicle-owners").permitAll()
+						// Endpoints de administración - requieren autenticación con roles
 						.requestMatchers("/api/**").hasAnyRole("ADMIN", "OWNER", "MECHANIC")
 						.anyRequest().authenticated()
 				)

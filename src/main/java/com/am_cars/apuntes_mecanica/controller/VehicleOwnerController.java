@@ -21,10 +21,9 @@ public class VehicleOwnerController {
 	private VehicleOwnerService vehicleOwnerService;
 	
 	/**
-	 * Crea un nuevo propietario de vehículo - Solo ADMIN
+	 * Crea un nuevo propietario de vehículo - Público (sin autenticación)
 	 */
 	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<VehicleOwner> create(@RequestBody VehicleOwner vehicleOwner) {
 		VehicleOwner created = vehicleOwnerService.create(vehicleOwner);
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);

@@ -21,10 +21,9 @@ public class MechanicController {
 	private MechanicService mechanicService;
 	
 	/**
-	 * Crea un nuevo mecánico - Solo ADMIN
+	 * Crea un nuevo mecánico - Público (sin autenticación)
 	 */
 	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<Mechanic> create(@RequestBody Mechanic mechanic) {
 		Mechanic created = mechanicService.create(mechanic);
 		return ResponseEntity.status(HttpStatus.CREATED).body(created);
